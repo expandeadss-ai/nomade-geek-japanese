@@ -1,0 +1,14 @@
+Teste Ouro da conta Manny — Nômade Geek Japanese
+
+O servidor gratuito do Render não permite atualizar diretamente o SQLite.
+Este pacote fornece um server.js que habilita temporariamente o plano Ouro para a conta autenticada cujo username seja Manny, sem alterar o banco de dados e sem cobrar nenhum pagamento.
+
+1) Pelo Safari, acesse: https://github.com/expandeadss-ai/nomade-geek-japanese/upload/main
+2) Envie somente o arquivo server.js que está neste ZIP, substituindo o arquivo server.js já existente.
+3) Confirme o Commit changes na branch main.
+4) No Render, antes de republicar, serão configuradas as variáveis:
+   TEST_OURO_USERNAME=Manny
+   TEST_OURO_UNTIL=2026-11-07T03:00:00Z
+5) Reimplante o serviço e entre com a conta Manny. A conta terá temporariamente os benefícios Ouro enquanto o teste estiver ativo.
+
+Importante: o Render Free reinicia e apaga o banco SQLite; pode ser necessário cadastrar Manny novamente após o deploy. O teste expira em 7/11/2026 e não cria cobrança nem altera o plano original gravado no banco.

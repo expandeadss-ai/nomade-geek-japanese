@@ -60,7 +60,7 @@ function updateActivity(userId,games,pairs,studies,xp){
  db.prepare(`INSERT INTO daily_activity(user_id,day,games,pairs,studies) VALUES(?,?,?,?,?)
  ON CONFLICT(user_id,day) DO UPDATE SET games=games+excluded.games,pairs=pairs+excluded.pairs,studies=studies+excluded.studies`).run(userId,today,games,pairs,studies);
 }
-function getQuota(user){return {limit:FREE_LIMIT,used:user.plan==='free'?user.free_games_used:null,remaining:user.plan==='free'?Math.max(0,FREE_LIMIT-user.free_games_used):null,unlimited:user.plan!=='free'};}
+function getQuota(user){const plan=effectivePlan(user);return {limit:FREE_LIMIT,used:plan==='free'?user.free_games_used:null,remaining:plan==='free'?Math.max(0,FREE_LIMIT-user.free_games_used):null,unlimited:plan!=='free'};}
 function studioAccess(plan,course){const level=studyCatalogs[course]?.level;return level && LEVELS.indexOf(plan)>=LEVELS.indexOf(level);}
 function studioView(q){return {id:q.id,unit:q.unit,prompt:q.prompt,options:q.options,speech:q.speech||null,emoji:q.emoji||null};}
 const KANA = [
@@ -92,7 +92,18 @@ function json(res,status,body){res.writeHead(status,{'Content-Type':'application
 function error(res,status,message){json(res,status,{error:message});}
 function shuffle(items){for(let i=items.length-1;i>0;i--){const j=crypto.randomInt(i+1);[items[i],items[j]]=[items[j],items[i]];}return items;}
 function weekStart(){const now=new Date(Date.now()-3*3600*1000);const weekday=(now.getUTCDay()+6)%7;now.setUTCDate(now.getUTCDate()-weekday);return now.toISOString().slice(0,10);}
-function safeUser(u){return u?{id:u.id,username:u.username,plan:u.plan,freeGamesUsed:u.free_games_used??0,freeLimit:FREE_LIMIT,xp:u.xp??0,level:levelName(u.xp??0),streak:u.streak??0}:null;}
+// Teste temporário de plano Ouro, sem cobrança e sem alterar o plano gravado no banco.
+// Ativar somente com TEST_OURO_USERNAME e TEST_OURO_UNTIL definidos no Render.
+// O prazo é obrigatório e, ao terminar, o plano original volta automaticamente.
+function effectivePlan(u){
+ if(!u)return 'free';
+ const username=String(process.env.TEST_OURO_USERNAME||'').trim();
+ const until=Date.parse(String(process.env.TEST_OURO_UNTIL||''));
+ if(username && Number.isFinite(until) && Date.now()<until &&
+    u.username.toLocaleLowerCase('pt-BR')===username.toLocaleLowerCase('pt-BR'))return 'ouro';
+ return u.plan;
+}
+function safeUser(u){return u?{id:u.id,username:u.username,plan:effectivePlan(u),freeGamesUsed:u.free_games_used??0,freeLimit:FREE_LIMIT,xp:u.xp??0,level:levelName(u.xp??0),streak:u.streak??0}:null;}
 function guestQuota(guest){const used=guest?.games_used??0;return {limit:GUEST_LIMIT,used,remaining:Math.max(0,GUEST_LIMIT-used)};}
 function cookieValue(req,name){return (req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(name+'='))?.slice(name.length+1)||null;}
 function getGuest(req){const token=cookieValue(req,'mj_guest');if(!token||!(/^[\w-]{30,100}$/.test(token)))return null;
@@ -104,7 +115,7 @@ function digest(text){return crypto.createHash('sha256').update(text).digest('he
 function hashPassword(password,salt){return crypto.scryptSync(password,salt,64).toString('hex');}
 function getAuth(req){const cookie=(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith('mj_session='));if(!cookie)return null;
  const token=cookie.slice(11);if(!/^[\w-]{30,100}$/.test(token))return null;
- const row=db.prepare('SELECT u.id,u.username,u.email,u.plan,u.free_games_used,u.xp,u.last_active,u.streak FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?').get(digest(token),Date.now());return row||null;}
+ const row=db.prepare('SELECT u.id,u.username,u.email,u.plan,u.free_games_used,u.xp,u.last_active,u.streak FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?').get(digest(token),Date.now());return row?{...row,plan:effectivePlan(row)}:null;}
 function setCookie(res,token,req){const isHttps=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';res.setHeader('Set-Cookie',`mj_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30*86400}${isHttps?'; Secure':''}`);}
 function clearCookie(res,req){const secure=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';res.setHeader('Set-Cookie',`mj_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure?'; Secure':''}`);}
 async function body(req){let b='';for await(const c of req){b+=c;if(b.length>20000)throw Error('Solicitação muito grande.');}try{return b?JSON.parse(b):{};}catch{throw Error('JSON inválido.');}}
@@ -172,7 +183,7 @@ async function api(req,res,url){const method=req.method, route=url.pathname;
     FROM scores s JOIN users u ON u.id=s.user_id WHERE s.week_start=?
     GROUP BY u.id ORDER BY points DESC,performances DESC,u.username COLLATE NOCASE ASC LIMIT 20`).all(weekStart());
   const my=getAuth(req);const mypoints=my?db.prepare('SELECT COALESCE(SUM(points),0) points FROM scores WHERE week_start=? AND user_id=?').get(weekStart(),my.id).points:null;
-  return json(res,200,{weekStart:weekStart(),timeZone:'America/Bahia',list:rows,myPoints:mypoints});
+  return json(res,200,{weekStart:weekStart(),timeZone:'America/Bahia',list:rows.map(row=>({...row,plan:effectivePlan(row)})),myPoints:mypoints});
  }
  if(route==='/api/my-stats'&&method==='GET'){
   const u=reqLogin(req,res);if(!u)return;
