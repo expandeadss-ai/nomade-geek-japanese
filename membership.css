@@ -15,3 +15,11 @@
 @media(max-width:650px){.nav-links>a{display:none}.nav-links .nav-cta{display:none}.header-inner{min-height:73px}.account-button{font-size:12px;padding:10px 11px;max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.plans-grid{grid-template-columns:1fr}.plan-card{padding:25px}.plan-price{font-size:40px}.ranking-card,.ranking-side{padding:15px}.rank-row{padding:11px;gap:8px}.rank-player small{font-size:10px}.rank-score{font-size:12px}.profile-grid strong{font-size:19px}}
 
 .detail-report{border-top:1px solid #424b68;margin-top:22px;padding-top:12px}.detail-report h4{color:#ffd2a7;margin:16px 0}
+
+.plan-card a.plan-price{display:block;color:inherit;text-decoration:none;cursor:pointer}.plan-card a.plan-price:hover{color:#ffdfab}.plan-card a.plan-price:focus-visible{outline:2px solid #f6a6c7;outline-offset:3px;border-radius:5px}
+
+/* V8: mobile-first, avatar e link de perfil. */
+.my-account-link{border:1px solid #665979;border-radius:13px;padding:11px 13px;background:#302a45;font-size:12px;font-weight:800;color:#ffe1f2;white-space:nowrap}.rank-avatar{display:grid;place-items:center;width:38px;height:38px;font-size:25px;flex:none;background:#39405c;border:1px solid #66708f;border-radius:50%}.forgot-password-link{color:#ffb9dc;text-align:center;font-size:13px;font-weight:800;text-underline-offset:4px}.auth-more{margin:7px 0;color:#c3cde3}.auth-more a{color:#ffbadd;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:650px){.nav-links{margin-left:auto;min-width:0;gap:6px}.my-account-link{padding:10px;font-size:11px}.account-button{max-width:122px;font-size:11px}.rank-avatar{width:32px;height:32px;font-size:21px}.rank-position{width:29px}}
+@media(max-width:375px){.my-account-link{font-size:10px;padding:8px}.account-button{max-width:97px;padding:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

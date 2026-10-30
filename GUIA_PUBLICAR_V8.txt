@@ -1,0 +1,24 @@
+ATUALIZAÇÃO V8 — NÔMADE GEEK JAPANESE
+
+Envie estes arquivos individuais para a raiz do GitHub:
+ server.js
+ index.html
+ membership.js
+ membership.css
+ sw.js
+ conta.html
+ account.js
+ account.css
+ assinar.html
+ checkout.js
+ checkout.css
+ package.json
+ style.css
+
+Acesse: https://github.com/expandeadss-ai/nomade-geek-japanese/upload/main
+Depois atualize o deploy no Render (o serviço atual tem autoDeploy desativado).
+
+TESTE: https://nomade-geek-japanese-teste.onrender.com/conta.html
+
+Recuperação por email requer RESEND_API_KEY, RESEND_FROM_EMAIL e RESET_SITE_ORIGIN.
+Esta versão não ativa pagamentos e não garante persistência de contas em hosting gratuito.

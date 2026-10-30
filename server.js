@@ -43,6 +43,17 @@ db.exec(`PRAGMA journal_mode=WAL;
  CREATE INDEX IF NOT EXISTS ix_study_user ON study_results(user_id,recorded_at DESC);
 
 `);
+// Migrações da V8: avatar persistente e tokens de recuperação de uso único.
+const AVATARS = Object.freeze({ninja:'🥷',sakura:'🌸',kitsune:'🦊',samurai:'⚔️',neko:'🐱',dragon:'🐉',tanuki:'🦝',onigiri:'🍙'});
+if(!db.prepare('PRAGMA table_info(users)').all().some(col=>col.name==='avatar')){
+ db.exec("ALTER TABLE users ADD COLUMN avatar TEXT NOT NULL DEFAULT 'ninja'");
+}
+db.exec(`CREATE TABLE IF NOT EXISTS password_resets (
+ token_hash TEXT PRIMARY KEY,
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_password_resets_expiry ON password_resets(expires_at);`);
 // Migração compatível com bancos existentes, sem apagar cadastro e ranking.
 const userCols=db.prepare('PRAGMA table_info(users)').all().map(r=>r.name);
 for(const [col,definition] of Object.entries({free_games_used:'INTEGER NOT NULL DEFAULT 0',xp:'INTEGER NOT NULL DEFAULT 0',last_active:'TEXT',streak:'INTEGER NOT NULL DEFAULT 0'})){
@@ -103,7 +114,7 @@ function effectivePlan(u){
     u.username.toLocaleLowerCase('pt-BR')===username.toLocaleLowerCase('pt-BR'))return 'ouro';
  return u.plan;
 }
-function safeUser(u){return u?{id:u.id,username:u.username,plan:effectivePlan(u),freeGamesUsed:u.free_games_used??0,freeLimit:FREE_LIMIT,xp:u.xp??0,level:levelName(u.xp??0),streak:u.streak??0}:null;}
+function safeUser(u){return u?{id:u.id,username:u.username,email:u.email||null,avatar:Object.hasOwn(AVATARS,u.avatar)?u.avatar:'ninja',plan:effectivePlan(u),freeGamesUsed:u.free_games_used??0,freeLimit:FREE_LIMIT,xp:u.xp??0,level:levelName(u.xp??0),streak:u.streak??0}:null;}
 function guestQuota(guest){const used=guest?.games_used??0;return {limit:GUEST_LIMIT,used,remaining:Math.max(0,GUEST_LIMIT-used)};}
 function cookieValue(req,name){return (req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(name+'='))?.slice(name.length+1)||null;}
 function getGuest(req){const token=cookieValue(req,'mj_guest');if(!token||!(/^[\w-]{30,100}$/.test(token)))return null;
@@ -115,7 +126,7 @@ function digest(text){return crypto.createHash('sha256').update(text).digest('he
 function hashPassword(password,salt){return crypto.scryptSync(password,salt,64).toString('hex');}
 function getAuth(req){const cookie=(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith('mj_session='));if(!cookie)return null;
  const token=cookie.slice(11);if(!/^[\w-]{30,100}$/.test(token))return null;
- const row=db.prepare('SELECT u.id,u.username,u.email,u.plan,u.free_games_used,u.xp,u.last_active,u.streak FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?').get(digest(token),Date.now());return row?{...row,plan:effectivePlan(row)}:null;}
+ const row=db.prepare('SELECT u.id,u.username,u.email,u.avatar,u.plan,u.free_games_used,u.xp,u.last_active,u.streak FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>?').get(digest(token),Date.now());return row?{...row,plan:effectivePlan(row)}:null;}
 function setCookie(res,token,req){const isHttps=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';res.setHeader('Set-Cookie',`mj_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30*86400}${isHttps?'; Secure':''}`);}
 function clearCookie(res,req){const secure=(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https';res.setHeader('Set-Cookie',`mj_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure?'; Secure':''}`);}
 async function body(req){let b='';for await(const c of req){b+=c;if(b.length>20000)throw Error('Solicitação muito grande.');}try{return b?JSON.parse(b):{};}catch{throw Error('JSON inválido.');}}
@@ -146,6 +157,64 @@ async function api(req,res,url){const method=req.method, route=url.pathname;
  if(method==='POST' && !verifyOrigin(req))return error(res,403,'Origem não autorizada.');
  if(route==='/api/health'&&method==='GET')return json(res,200,{ok:true,app:'Memória Japonesa',week:weekStart()});
  if(route==='/api/me'&&method==='GET'){const u=getAuth(req);return json(res,200,{user:safeUser(u),quota:u?getQuota(u):null,guestQuota:guestQuota(getGuest(req))});}
+ if(route==='/api/profile/avatar'&&method==='POST'){
+  const u=reqLogin(req,res);if(!u)return;
+  if(!rateLimit(req,'avatar',30,10))return error(res,429,'Muitas alterações. Tente novamente em alguns minutos.');
+  const b=await body(req),avatar=String(b.avatar||'');
+  if(!Object.hasOwn(AVATARS,avatar))return error(res,400,'Avatar inválido.');
+  db.prepare('UPDATE users SET avatar=? WHERE id=?').run(avatar,u.id);
+  return json(res,200,{user:safeUser({...u,avatar})});
+ }
+ if(route==='/api/profile/password'&&method==='POST'){
+  const u=reqLogin(req,res);if(!u)return;
+  if(!rateLimit(req,'password-change',8,30))return error(res,429,'Muitas tentativas. Tente novamente mais tarde.');
+  const b=await body(req),oldPassword=String(b.currentPassword||''),newPassword=String(b.newPassword||'');
+  if(newPassword.length<8||newPassword.length>128)return error(res,400,'A nova senha precisa ter entre 8 e 128 caracteres.');
+  const row=db.prepare('SELECT salt,password_hash FROM users WHERE id=?').get(u.id);
+  if(!row||!crypto.timingSafeEqual(Buffer.from(hashPassword(oldPassword,row.salt),'hex'),Buffer.from(row.password_hash,'hex')))return error(res,403,'Senha atual incorreta.');
+  const salt=crypto.randomBytes(16).toString('hex');
+  db.prepare('UPDATE users SET salt=?, password_hash=? WHERE id=?').run(salt,hashPassword(newPassword,salt),u.id);
+  db.prepare('DELETE FROM sessions WHERE user_id=?').run(u.id);
+  db.prepare('DELETE FROM password_resets WHERE user_id=?').run(u.id);
+  clearCookie(res,req);
+  return json(res,200,{ok:true,message:'Senha alterada. Entre novamente com a nova senha.'});
+ }
+ if(route==='/api/password/forgot'&&method==='POST'){
+  if(!rateLimit(req,'password-forgot',5,30))return error(res,429,'Muitas tentativas. Tente novamente em alguns minutos.');
+  const b=await body(req),email=String(b.email||'').trim().toLowerCase();
+  if(email.length>160||!/^\S+@\S+\.\S+$/.test(email))return error(res,400,'Informe um e-mail válido.');
+  const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+  const origin=process.env.PUBLIC_SITE_ORIGIN_RESET||process.env.RESET_SITE_ORIGIN;
+  if(!apiKey||!from||!origin||!/^https:\/\/[^\s/]+$/.test(origin))return error(res,503,'Recuperação por e-mail ainda não configurada neste ambiente de teste.');
+  const u=db.prepare('SELECT id FROM users WHERE email=?').get(email);
+  const generic={ok:true,message:'Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.'};
+  if(!u)return json(res,200,generic);
+  const token=crypto.randomBytes(32).toString('base64url'),hash=digest(token);
+  db.prepare('DELETE FROM password_resets WHERE user_id=? OR expires_at<?').run(u.id,Date.now());
+  db.prepare('INSERT INTO password_resets(token_hash,user_id,expires_at) VALUES(?,?,?)').run(hash,u.id,Date.now()+30*60*1000);
+  const resetUrl=origin+'/conta.html?reset='+encodeURIComponent(token);
+  try{
+   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
+   let response;
+   try{response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json'},body:JSON.stringify({from,to:[email],subject:'Redefinir senha • Nômade Geek Japanese',text:'Recebemos um pedido para redefinir a senha da sua conta. Abra este link nos próximos 30 minutos: '+resetUrl+'\n\nSe você não fez esse pedido, ignore esta mensagem.'}),signal:controller.signal});}
+   finally{clearTimeout(timeout);}
+   if(!response.ok)throw Error('Falha no provedor de e-mail.');
+  }catch(e){db.prepare('DELETE FROM password_resets WHERE token_hash=?').run(hash);console.error('Envio de recuperação indisponível:',e.message);return json(res,200,generic);}
+  return json(res,200,generic);
+ }
+ if(route==='/api/password/reset'&&method==='POST'){
+  if(!rateLimit(req,'password-reset',10,30))return error(res,429,'Muitas tentativas. Tente mais tarde.');
+  const b=await body(req),token=String(b.token||''),password=String(b.password||'');
+  if(!/^[\w-]{30,100}$/.test(token)||password.length<8||password.length>128)return error(res,400,'Link inválido ou senha fora do tamanho permitido (8 a 128 caracteres).');
+  const hash=digest(token),t=db.prepare('SELECT user_id FROM password_resets WHERE token_hash=? AND expires_at>?').get(hash,Date.now());
+  if(!t)return error(res,400,'Link expirado ou já utilizado. Solicite outro.');
+  const salt=crypto.randomBytes(16).toString('hex');
+  db.prepare('UPDATE users SET salt=?,password_hash=? WHERE id=?').run(salt,hashPassword(password,salt),t.user_id);
+  db.prepare('DELETE FROM password_resets WHERE user_id=?').run(t.user_id);
+  db.prepare('DELETE FROM sessions WHERE user_id=?').run(t.user_id);
+  clearCookie(res,req);
+  return json(res,200,{ok:true,message:'Senha atualizada. Entre com sua nova senha.'});
+ }
  if(route==='/api/signup'&&method==='POST'){
   if(!rateLimit(req,'signup',8))return error(res,429,'Muitas tentativas. Tente mais tarde.');
   const b=await body(req),username=String(b.username||'').trim(),email=String(b.email||'').trim().toLowerCase(),password=String(b.password||'');
@@ -179,7 +248,7 @@ async function api(req,res,url){const method=req.method, route=url.pathname;
   db.prepare('DELETE FROM users WHERE id=?').run(u.id);sessionGames.delete('u:'+u.id);studySessions.delete(u.id);clearCookie(res,req);return json(res,200,{ok:true});
  }
  if(route==='/api/ranking'&&method==='GET'){
-  const rows=db.prepare(`SELECT u.username,u.plan,SUM(s.points) points,COUNT(*) performances
+  const rows=db.prepare(`SELECT u.username,u.avatar,u.plan,SUM(s.points) points,COUNT(*) performances
     FROM scores s JOIN users u ON u.id=s.user_id WHERE s.week_start=?
     GROUP BY u.id ORDER BY points DESC,performances DESC,u.username COLLATE NOCASE ASC LIMIT 20`).all(weekStart());
   const my=getAuth(req);const mypoints=my?db.prepare('SELECT COALESCE(SUM(points),0) points FROM scores WHERE week_start=? AND user_id=?').get(weekStart(),my.id).points:null;
@@ -330,7 +399,7 @@ const app=http.createServer(async(req,res)=>{
  }
  if(req.method!=='GET'&&req.method!=='HEAD')return error(res,405,'Método não permitido.');
  let uri=url.pathname; if(uri==='/')uri='/index.html';
- const allowed=new Set(['index.html','style.css','app.js','membership.js','membership.css','academy.js','academy.css','favicon.svg','manifest.webmanifest','anuncio.png','sw.js']);
+ const allowed=new Set(['conta.html','account.css','account.js','index.html','assinar.html','checkout.css','checkout.js','style.css','app.js','membership.js','membership.css','academy.js','academy.css','favicon.svg','manifest.webmanifest','anuncio.png','sw.js']);
  const filename=path.basename(uri);if(!allowed.has(filename)||uri!==`/${filename}`)return error(res,404,'Arquivo não encontrado.');
  const file=path.join(ROOT,filename);if(!fs.existsSync(file))return error(res,404,'Arquivo não encontrado.');
  res.writeHead(200,{'Content-Type':TYPES[path.extname(file)]||'application/octet-stream','Cache-Control':filename==='index.html'?'no-cache':'public, max-age=600'});
