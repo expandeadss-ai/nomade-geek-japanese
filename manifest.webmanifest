@@ -1,0 +1,16 @@
+{
+  "name": "Jogo da Memória Japonês — Ranking e Planos",
+  "short_name": "Memória Japonesa",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#101527",
+  "theme_color": "#101527",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

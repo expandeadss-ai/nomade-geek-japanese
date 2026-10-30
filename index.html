@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101527">
+  <meta name="description" content="Aprenda hiragana e katakana brincando! Teste 5 partidas sem cadastro e ganhe mais 16 partidas gratuitas ao criar uma conta para aprender hiragana e katakana.">
+  <meta name="color-scheme" content="dark">
+  <title>Jogo da Memória Japonês | Aprenda hiragana e katakana</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="membership.css">
+  <link rel="stylesheet" href="academy.css">
+  <script src="app.js" defer></script>
+  <script src="membership.js" defer></script>
+  <script src="academy.js" defer></script>
+</head>
+<body>
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#inicio" aria-label="Jogo da Memória Japonês, início">
+        <span class="brand-logo" aria-hidden="true">あ</span>
+        <span class="brand-text">MEMÓRIA <strong>JAPONESA</strong><small>APRENDA JOGANDO</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="#como-jogar">Como jogar</a>
+        <a href="#ranking">Ranking</a>
+        <a href="#academia">Academia</a>
+        <a href="#planos">Planos</a>
+        <a class="nav-cta" href="#jogo">Jogar grátis ↗</a>
+        <button type="button" class="account-button" id="account-open">Entrar / cadastrar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot"></span> 5 PARTIDAS SEM CADASTRO • 16 GRÁTIS COM CONTA</p>
+        <h1 id="hero-title">Japonês fica mais divertido quando você <em>joga.</em></h1>
+        <p class="hero-description">Aprenda <strong>hiragana</strong> e <strong>katakana</strong> no seu ritmo. Escolha entre três modos: Fácil, Médio ou Difícil, e pratique a leitura em romaji.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#jogo">🎮 Começar a jogar <span aria-hidden="true">→</span></a>
+          <a class="button button-ghost" href="#como-jogar">Como funciona</a>
+        </div>
+        <div class="hero-points" aria-label="Vantagens">
+          <span>✓ 5 partidas sem login</span><span>✓ Ranking semanal com conta</span><span>✓ Funciona no celular</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="ring ring-1"></div><div class="ring ring-2"></div>
+        <span class="hero-sakura sakura-1">✿</span><span class="hero-sakura sakura-2">✿</span><span class="hero-sakura sakura-3">✿</span>
+        <div class="hero-game-card">
+          <div class="mini-top"><span class="mini-pill">✨ APRENDA BRINCANDO</span><span class="mini-stars">★ ★ ★</span></div>
+          <div class="mini-title">Encontre os pares!</div>
+          <div class="mini-grid">
+            <div class="mini-card open japanese">あ</div><div class="mini-card hidden">?</div><div class="mini-card open roman">a</div><div class="mini-card hidden">?</div>
+            <div class="mini-card hidden">?</div><div class="mini-card open japanese">カ</div><div class="mini-card hidden">?</div><div class="mini-card open roman">ka</div>
+            <div class="mini-card hidden">?</div><div class="mini-card hidden">?</div><div class="mini-card hidden">?</div><div class="mini-card hidden">?</div>
+          </div>
+          <div class="mini-foot"><span>🌸 HIRAGANA + KATAKANA</span><span>24 PARES</span></div>
+        </div>
+        <span class="float-label label-top">🧠 Exercite a memória</span>
+        <span class="float-label label-bottom">🌸 Aprenda japonês</span>
+      </div>
+    </section>
+
+    <section class="feature-strip" aria-label="Características do jogo">
+      <div class="shell strip-grid"><div><span>あ</span><div><strong>Hiragana</strong><small>Primeiros caracteres</small></div></div><div><span>カ</span><div><strong>Katakana</strong><small>Complete o alfabeto</small></div></div><div><span>↔</span><div><strong>Memória</strong><small>3 modos de dificuldade</small></div></div><div><span>★</span><div><strong>Seu ritmo</strong><small>Jogue quando quiser</small></div></div></div>
+    </section>
+
+    <section id="jogo" class="game-section shell" aria-labelledby="game-title">
+      <div class="section-intro"><p class="section-kicker">SUA ÁREA DE JOGO</p><h2 id="game-title">Escolha sua dificuldade</h2><p>Comece vendo a leitura nas cartas e evolua até associar <strong>24 pares</strong> sem nenhuma dica.</p></div>
+      <div class="mode-selector" role="group" aria-label="Escolha o nível do jogo">
+        <button type="button" class="mode-choice" id="mode-easy" data-mode="easy" aria-pressed="true"><span class="mode-emoji">🌱</span><span class="mode-title">Fácil <small>8 pares</small></span><span class="mode-summary">Japonês e leitura juntos, em duas cartas iguais.</span><span class="mode-example"><span>あ <small>a</small></span> <b>+</b> <span>あ <small>a</small></span></span></button>
+        <button type="button" class="mode-choice" id="mode-medium" data-mode="medium" aria-pressed="false"><span class="mode-emoji">🌸</span><span class="mode-title">Médio <small>12 pares</small></span><span class="mode-summary">Japonês e leitura separados, com uma dica.</span><span class="mode-example"><span>あ</span> <b>+</b> <span>a</span></span></button>
+        <button type="button" class="mode-choice" id="mode-hard" data-mode="hard" aria-pressed="false"><span class="mode-emoji">🔥</span><span class="mode-title">Difícil <small>24 pares</small></span><span class="mode-summary">48 cartas. Japonês e leitura separados. Sem dicas.</span><span class="mode-example"><span>カ</span> <b>+</b> <span>ka</span></span></button>
+      </div>
+      <div class="game-layout">
+        <div class="game-panel">
+          <div class="game-topbar">
+            <div><span class="small-overline">FASE ATUAL</span><h3 id="phase-title">Hiragana • Parte 1</h3><p id="phase-desc">Associe os caracteres à pronúncia.</p></div>
+            <button id="sound-toggle" class="icon-button" type="button" aria-pressed="true" aria-label="Desativar som" title="Ativar ou desativar sons">🔊</button>
+          </div>
+          <div class="stats-row" aria-live="polite"><div><span>ACERTOS</span><strong id="matches-count">0/8</strong></div><div><span>TEMPO</span><strong id="timer-display">00:00</strong></div><div><span>TENTATIVAS</span><strong id="tries-count">0</strong></div></div>
+          <div class="progress-track" role="progressbar" aria-label="Progresso de pares" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" id="game-progress"><span id="progress-fill"></span></div>
+          <div id="game-board" class="game-board" aria-label="Tabuleiro de cartas da memória"></div>
+          <div class="board-toolbar"><span id="status-text" role="status" aria-live="polite">Escolha um modo e toque em começar.</span><div class="board-tools"><button id="hint-btn" class="hint-button" type="button" hidden>🔍 Dica de 3 s</button><button id="restart-btn" class="text-button" type="button">↻ Reiniciar</button></div></div>
+          <div id="start-overlay" class="start-overlay"><div class="overlay-illustration" aria-hidden="true">🎌</div><h3 id="start-title">Comece pelo modo fácil!</h3><p id="start-description">Encontre dois cartões iguais. Cada um mostra a letra japonesa e a leitura logo abaixo.</p><button id="start-btn" class="button button-primary" type="button">Começar fase <span aria-hidden="true">→</span></button></div>
+          <div id="win-overlay" class="win-overlay" hidden><div class="win-emoji" aria-hidden="true">🎉</div><h3 id="win-title">Fase concluída!</h3><p id="win-message">Você encontrou todos os pares.</p><div class="win-stats"><div><b id="win-time">00:00</b><span>Tempo</span></div><div><b id="win-tries">0</b><span>Tentativas</span></div><div><b id="win-accuracy">0%</b><span>Precisão</span></div></div><button id="next-btn" class="button button-primary" type="button">Próxima fase <span aria-hidden="true">→</span></button></div>
+        </div>
+        <aside class="game-sidebar" aria-label="Informações da jornada">
+          <div class="sidebar-card"><p class="section-kicker">SUA JORNADA</p><h3>Quatro fases em cada modo.</h3><div id="phase-list" class="phase-list"></div></div>
+          <div class="sidebar-card tip-card"><span class="tip-icon">💡</span><h3>Dica rápida</h3><p>Hiragana e katakana representam sons. As letras <b>あ</b> e <b>ア</b>, por exemplo, são lidas como <b>“a”</b>.</p><p class="disclaimer">As letras latinas mostram a leitura (romaji), não uma tradução de palavras.</p></div>
+          <div class="sidebar-card personal-best"><span>🏆 RECORDE NO MODO ESCOLHIDO</span><strong id="best-time">Ainda não registrado</strong><small id="best-caption">Complete a fase para marcar seu recorde.</small></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="free-counter shell" aria-label="Saldo de partidas gratuitas">
+      <div class="counter-box"><div><span class="section-kicker">🎟️ EXPERIMENTE SEM LOGIN</span><h3 id="free-counter-title">🎮 5 de 5 partidas disponíveis sem cadastro</h3><p id="free-counter-detail">Comece sem e-mail nem senha. Após 5 partidas, crie sua conta para liberar mais 16 grátis. Cada início e reinício consome uma partida.</p></div><a href="#planos" class="button button-ghost">Conhecer planos</a></div>
+    </section>
+
+    <section id="academia" class="academy-section shell" aria-labelledby="academy-title">
+      <div class="section-intro center"><p class="section-kicker">NÔMADE GEEK JAPANESE • ÁREA DE APRENDIZADO</p><h2 id="academy-title">🎌 Sua academia de japonês</h2><p>Missões, XP, conquistas, revisão de letras, vocabulário e aulas curtas. Faça login para acompanhar seu progresso.</p></div>
+      <div class="academy-dashboard">
+        <div class="academy-hero"><div><span class="academy-kicker">SEU PERSONAGEM</span><h3 id="academy-level">🌱 Iniciante</h3><p id="academy-username">Entre na sua conta para evoluir.</p></div><div class="academy-xp"><strong id="academy-xp">0 XP</strong><span id="academy-streak">🔥 0 dias seguidos</span></div></div>
+        <div class="academy-grid">
+          <article class="academy-panel"><h3>🎯 Missões de hoje</h3><div id="academy-missions" class="missions-list"><p>Entre na conta para ver as missões.</p></div></article>
+          <article class="academy-panel"><h3>⚔️ Desafio de 7 dias</h3><p id="academy-week-challenge">Uma pequena atividade por dia para criar constância.</p><div id="academy-challenge-days" class="challenge-days" aria-label="Dias de estudo"></div><p id="academy-weekly" class="subtle-copy">🏆 Torneio semanal: complete 3 partidas.</p></article>
+        </div>
+        <div class="academy-panel"><h3>🗓️ Plano de 30 dias</h3><p id="academy-plan-30" class="subtle-copy">Uma rotina de estudo em quatro etapas.</p><div class="study-roadmap" id="academy-roadmap"></div></div>
+        <div class="academy-panel"><h3>🏅 Conquistas desbloqueáveis</h3><div id="academy-achievements" class="achievements"></div></div>
+      </div>
+      <div class="section-intro center"><h3>Explore os treinos</h3><p>As atividades apresentam conteúdo introdutório original. A trilha N5 não equivale ao curso completo nem à certificação oficial.</p></div>
+      <div id="academy-courses" class="course-grid"></div>
+      <div id="study-stage" class="study-stage" hidden aria-live="polite">
+         <div class="study-top"><span class="section-kicker" id="study-name">Treino</span><button class="muted-action" id="study-close" type="button">Fechar ✕</button></div>
+         <p class="study-count" id="study-count">Questão 1/8</p><div class="progress-track"><span id="study-progress" style="width:0%"></span></div>
+         <h3 id="study-prompt">Aprenda algo novo</h3><button id="study-speak" class="button button-ghost" type="button" hidden>🔊 Ouvir pronúncia japonesa</button>
+         <div id="study-answers" class="study-answers"></div><p id="study-result" role="status"></p>
+         <button id="study-next" class="button button-primary" type="button" hidden>Próxima questão →</button>
+      </div>
+      <p class="academy-note">🔐 Bronze libera revisões e missões. Prata adiciona vocabulário e escuta por síntese de voz do dispositivo (depende do navegador). Ouro libera atividades N5, expressões originais e simulado. Os planos pagos só são liberados após ativação legítima; o site não cobra automaticamente.</p>
+    </section>
+
+    <section id="ranking" class="ranking-section shell" aria-labelledby="ranking-title">
+      <div class="section-intro center"><p class="section-kicker">COMPITA COM VOCÊ MESMO E COM A COMUNIDADE</p><h2 id="ranking-title">🏆 Ranking semanal</h2><p>Todos os jogadores com conta podem competir durante suas partidas disponíveis. Os pontos são calculados no servidor e os planos pagos não aumentam a pontuação.</p></div>
+      <div class="ranking-layout">
+        <div class="ranking-card"><div class="rank-top"><div><h3>Os melhores da semana</h3><p id="week-label">Semana atual • horário de Bahia</p></div><button class="rank-link" id="refresh-ranking" type="button">↻ Atualizar</button></div><div id="ranking-list" class="ranking-list" aria-live="polite"><p class="ranking-empty">Carregando ranking...</p></div></div>
+        <aside class="ranking-side"><span class="rank-pill">🌸 NOVA DISPUTA TODA SEGUNDA</span><h3>Ganhe pontos de verdade</h3><p>Conclua partidas com sua conta conectada. O servidor valida suas jogadas. Conta só sua <strong>melhor pontuação semanal de cada fase e modo</strong>, para evitar pontuação infinita por repetir a mesma fase.</p><p id="my-points">Entre na conta para marcar pontos.</p><p id="rank-note">Jogue 5 partidas sem cadastro. Somente partidas com login entram no ranking.</p><p class="account-slim" id="account-badge">Visitante • sem ranking</p><button id="profile-link" class="button button-ghost" type="button" hidden>📊 Meu desempenho</button></aside>
+      </div>
+      <section id="profile-panel" class="profile-panel" hidden aria-label="Meu desempenho"><h3 id="profile-title">Seu painel</h3><div class="profile-grid"><div><strong id="stat-games">0</strong><span>Partidas concluídas</span></div><div><strong id="stat-total">0</strong><span>Pontos totais</span></div><div><strong id="stat-record">—</strong><span>Menor tempo</span></div></div><h4>Histórico de partidas</h4><p id="history-caption" class="disclaimer">Limite de registros visíveis conforme o plano.</p><div id="history-list" class="history-list"></div><div id="detail-report" class="detail-report" hidden></div><div class="profile-actions"><button id="logout-btn" class="muted-action" type="button">Sair da conta</button><button id="delete-account" class="muted-action danger" type="button">Excluir minha conta e dados</button></div></section>
+    </section>
+
+    <section id="planos" class="plans-section" aria-labelledby="plans-title"><div class="shell"><div class="section-intro center"><p class="section-kicker">ESCOLHA COMO EVOLUIR</p><h2 id="plans-title">💎 Três níveis para aprender</h2><p>5 partidas sem cadastro; com conta grátis, mais 16 partidas iniciadas no total. Planos ativos: partidas ilimitadas e novos treinos. Os valores abaixo são propostas mensais.</p></div>
+      <div class="plans-grid">
+        <article class="plan-card"><span class="plan-tag">🥉 COMEÇAR</span><h3>Bronze</h3><div class="plan-price">R$ 20<small>/mês</small></div><p>Para aprender o alfabeto sem travar no limite gratuito.</p><ul class="plan-features"><li>🎮 Partidas ilimitadas (3 modos)</li><li>🧠 Revisão inteligente dos kana</li><li>🎯 Missões diárias, XP e conquistas</li><li>📅 Desafio de 7 dias</li><li>🏆 Ranking e torneio semanal justo</li><li>📈 Histórico de 10 partidas</li></ul><button type="button" class="button button-ghost" data-interest="bronze">Quero o Bronze</button></article>
+        <article class="plan-card popular"><span class="plan-tag">⭐ PARA APRENDER MAIS</span><h3>Prata</h3><div class="plan-price">R$ 30<small>/mês</small></div><p>Para reconhecer palavras e treinar o ouvido.</p><ul class="plan-features"><li>✅ Tudo do Bronze</li><li>🔊 Áudio japonês via voz do dispositivo</li><li>🖼️ Desafio das 100 palavras com ícones e significado</li><li>🎧 Quiz de escuta japonês</li><li>📊 Relatórios por modo</li><li>📚 Histórico de 50 partidas</li></ul><button type="button" class="button button-primary" data-interest="prata">Quero o Prata</button></article>
+        <article class="plan-card"><span class="plan-tag">👑 MAIS CONTEÚDO</span><h3>Ouro</h3><div class="plan-price">R$ 40<small>/mês</small></div><p>Para avançar no japonês iniciante.</p><ul class="plan-features"><li>✅ Tudo do Prata</li><li>🇯🇵 Trilha introdutória de N5</li><li>🎌 Frases originais em clima de anime</li><li>📝 Simulado semanal introdutório</li><li>📈 Histórico ampliado e relatório por fase</li><li>🥇 Identificação Ouro no perfil</li></ul><button type="button" class="button button-ghost" data-interest="ouro">Quero o Ouro</button></article>
+      </div><p id="plan-status" class="plan-status" role="status"></p><p class="plans-disclaimer"><strong>⚠️ Pré-cadastro, não pagamento:</strong> os botões registram interesse; não cobram, não renovam e não ativam assinaturas. Para liberar os planos comercialmente, é obrigatório integrar pagamentos e confirmação segura de assinatura. Nenhum plano aumenta pontos do ranking.</p>
+    </div></section>
+
+    <section id="privacidade" class="privacy-section shell"><h2>Privacidade e contas</h2><p>Visitantes podem iniciar 5 partidas sem conta. Usamos um cookie aleatório HttpOnly e registramos a contagem no servidor; apagar cookies ou usar outro navegador pode reiniciar esse limite. Essas partidas não entram no ranking. Para jogar partidas oficiais e participar do ranking, solicitamos nome de usuário, e-mail e senha. A senha é armazenada de forma criptograficamente derivada, com sal, e nunca em texto puro. Guardamos resultados de partidas, quantidade de partidas gratuitas iniciadas, XP, missões, tentativas em exercícios e correções, progresso no ranking, interesse em planos e sessão de login. Usamos esses dados apenas para o funcionamento do jogo e não vendemos informações pessoais. Você pode excluir sua conta e seus resultados em “Meu desempenho”. O limite de 16 partidas é controlado pelo servidor por conta. Uma partida iniciada ou reiniciada utiliza uma entrada; falhas de conexão não liberam partidas locais. Registros antigos de partidas concluídas podem ser contabilizados na migração. Não solicitamos cartão porque pagamentos ainda não foram integrados. Antes da publicação comercial, o responsável pelo site deve informar seus canais de contato, política de retenção de dados e demais requisitos legais aplicáveis.</p></section>
+    <section id="como-jogar" class="how-section shell" aria-labelledby="how-title"><p class="section-kicker">SIMPLES E DIVERTIDO</p><h2 id="how-title">Como jogar</h2><div class="how-grid"><article><span class="how-number">01</span><div class="how-icon">🃏</div><h3>Vire duas cartas</h3><p>Escolha duas cartas no tabuleiro para revelar o conteúdo.</p></article><article><span class="how-number">02</span><div class="how-icon">あ ↔ a</div><h3>Encontre o par</h3><p>No Fácil, procure cartas iguais com japonês e leitura juntos. No Médio e Difícil, associe as cartas separadas.</p></article><article><span class="how-number">03</span><div class="how-icon">🏆</div><h3>Avance de fase</h3><p>Conclua os pares do seu modo e avance pelas quatro fases de hiragana e katakana.</p></article></div></section>
+
+    <section class="bottom-banner shell" aria-label="Convite para jogar"><div><p class="section-kicker">PRONTO PARA COMEÇAR?</p><h2>Seu próximo par está esperando. 🌸</h2><p>Experimente 5 partidas sem cadastro. Crie sua conta para ganhar mais 16 e evoluir com desafios, vocabulário e cursos.</p></div><a class="button button-light" href="#jogo">Jogar agora <span aria-hidden="true">→</span></a></section>
+  </main>
+  <footer class="site-footer"><div class="shell footer-inner"><span>🌸 Memória Japonesa</span><small>Jogo educativo independente • 5 partidas sem cadastro + 16 com conta • Assinaturas sem cobrança ativa</small><a href="#inicio">Voltar ao topo ↑</a></div></footer>
+  <div class="modal-backdrop" id="account-modal" hidden role="presentation"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="account-heading"><button id="modal-close" class="modal-close" type="button" aria-label="Fechar">×</button><p class="section-kicker">MEMÓRIA JAPONESA</p><h2 id="account-heading">Sua conta de jogador 🌸</h2><p>Crie sua conta para receber 16 partidas gratuitas e registrar resultados no ranking semanal. Cada início ou reinício consome 1 partida.</p><div class="tabs" role="tablist" aria-label="Entrar ou cadastrar"><button id="tab-login" type="button" role="tab" aria-selected="true">Entrar</button><button id="tab-signup" type="button" role="tab" aria-selected="false">Criar conta</button></div>
+  <form id="auth-login" class="auth-form"><label>E-mail<input id="auth-email" name="email" autocomplete="email" type="email" required maxlength="160"></label><label>Senha<input name="password" autocomplete="current-password" type="password" minlength="8" required></label><button class="button button-primary" type="submit">Entrar e jogar</button></form>
+  <form id="auth-signup" class="auth-form" hidden><label>Nome no ranking<input id="auth-username" name="username" autocomplete="username" minlength="3" maxlength="18" pattern="[A-Za-z0-9_À-ÿ]+" required></label><label>E-mail<input name="email" autocomplete="email" type="email" required maxlength="160"></label><label>Senha (mínimo 8 caracteres)<input name="password" autocomplete="new-password" type="password" minlength="8" required></label><button class="button button-primary" type="submit">Criar minha conta</button></form>
+  <p id="auth-feedback" class="form-feedback" role="status"></p><p>Ao cadastrar-se, você concorda com o uso dos dados descrito na <a href="#privacidade" style="color:#f6a4cc" id="privacy-link">política de privacidade</a>.</p></div></div>
+</body>
+</html>
